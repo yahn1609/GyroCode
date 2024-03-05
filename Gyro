@@ -1,0 +1,113 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.Encoder;
+
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+import edu.wpi.first.wpilibj2.command.PIDSubsystem;
+import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.kauailabs.navx.frc.AHRS;
+
+/**
+ * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the build.gradle file in the
+ * project.
+ */
+
+
+public class Robot extends TimedRobot {
+double kP = 1;
+CANSparkMax leftrear = new CANSparkMax(3, MotorType.kBrushed);
+CANSparkMax leftfront = new CANSparkMax(4, MotorType.kBrushed);
+CANSparkMax rightrear = new CANSparkMax(5, MotorType.kBrushed);
+CANSparkMax rightfront = new CANSparkMax(6, MotorType.kBrushed);
+
+DifferentialDrive drive = new DifferentialDrive(leftrear::set, rightrear::set);
+
+  AHRS gyro = new AHRS(SPI.Port.kMXP);
+  
+
+
+
+
+
+
+
+PIDController pid = new PIDController(kDefaultPeriod, kDefaultPeriod, kDefaultPeriod);
+ 
+  
+  /**
+   * This function is run when the robot is first started up and should be used for any
+   * initialization code.
+   */
+
+   
+  @Override
+  public void robotInit() {
+    Shuffleboard.getTab("gyrotest").add(gyro);
+   
+    encoder.setDistancePerPulse(1./256.);
+   
+    //Encoder.setDistancePerPulse(1./256.);
+
+    rightrear.setInverted(true);
+    
+    leftrear.addFollower(leftfront);
+    rightrear.addFollower(rightfront)
+
+  }
+
+  @Override
+  public void robotPeriodic() {}
+
+  @Override
+  public void autonomousInit() {}
+
+  @Override
+  public void autonomousPeriodic() {
+
+    leftfront.set(pid.calculate(kDefaultPeriod), setpoint(0));
+
+    double error = -gyro.getRate();
+    drive.tankDrive(.5 + kP * error, .5 - kP * error);
+  }
+
+  @Override
+  public void teleopInit() {}
+
+  @Override
+  public void teleopPeriodic() {}
+
+  @Override
+  public void disabledInit() {}
+
+  @Override
+  public void disabledPeriodic() {}
+
+  @Override
+  public void testInit() {}
+
+  @Override
+  public void testPeriodic() {}
+
+  @Override
+  public void simulationInit() {}
+
+  @Override
+  public void simulationPeriodic() {}
+}
